@@ -4,23 +4,31 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CarModelFilterRequest;
 use App\Http\Requests\CarModelRequest;
+use App\Http\Resources\CarModelResource;
 use App\Models\CarModel;
+use App\Repositories\CarModelRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 
 class CarModelController extends Controller
 {
+
+    protected $carModelRepository;
+    public function __construct(CarModelRepositoryInterface $carModelRepository)
+    {
+        $this->carModelRepository = $carModelRepository;
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $cars = CarModel::with(['brand', 'engine', 'transmission'])->orderBy('id', 'desc')->paginate(15);
-        return response()->json([
-            'data'   => $cars,
-            'status' => true
-        ], Response::HTTP_OK);
+        $cars = $this->carModelRepository->all($request);
+        return CarModelResource::collection($cars)
+                ->response()
+                ->setStatusCode(Response::HTTP_OK);
     }
 
     /**
@@ -88,52 +96,6 @@ class CarModelController extends Controller
             'status' => true,
             'message' => 'Data has successfully deleted'
         ], Response::HTTP_NO_CONTENT);
-    }
-
-    public function filter(CarModelFilterRequest $request)
-    {
-        // dd($request->all());
-        $query = CarModel::query();
-
-        
-        if ($request->filled('brand_id')) {
-            $query->where('brand_id', $request->brand_id);
-        }
-
-               
-        if ($request->filled('year_from') && $request->filled('year_to')) {
-            $query->whereBetween('year', [$request->year_from, $request->year_to]);
-        }
-
-        
-        if ($request->filled('price_min') && $request->filled('price_max')) {
-            $query->whereBetween('price', [$request->price_min, $request->price_max]);
-        }
-
-       
-        if ($request->filled('engine_id')) {
-            $query->where('engine_id', $request->engine_id);
-        }
-
-        
-        if ($request->filled('transmission_id')) {
-            $query->where('transmission_id', $request->transmission_id);
-        }
-
-       
-        if ($request->filled('exterior_color')) {
-            $query->where('exterior_color', 'like', '%' . $request->exterior_color . '%');
-        }
-       
-        if ($request->filled('interior_color')) {
-            $query->where('interior_color', 'like', '%' . $request->interior_color . '%');
-        }
-        $cars = $query->with(['brand', 'engine', 'transmission'])->paginate(15);
-
-        return response()->json([
-            'status' => true,
-            'data'   => $cars
-        ], Response::HTTP_OK);
     }
 
     public function interiorColors()

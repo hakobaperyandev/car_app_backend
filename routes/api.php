@@ -13,13 +13,12 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('cars',               [CarModelController::class, 'index']);
     Route::get('cars/{car}',         [CarModelController::class, 'show']);
-    Route::post('/filter/cars',      [CarModelController::class, 'filter']);
     Route::post('/logout',           [AuthController::class, 'logout']);
     Route::get('brands',             [BrandController::class, 'index']); 
-    Route::get('engines-list',       [EngineController::class, 'index']);
-    Route::get('transmissions-list', [TransmissionController::class, 'index']);
+    Route::get('engines',            [EngineController::class, 'index']);
+    Route::get('transmissions',      [TransmissionController::class, 'index']);
     Route::get('interior-colors',    [CarModelController::class, 'interiorColors']);
-    Route::get('exterior-colors',    [CarModelController::class, 'exteriorColors']);
+    Route::get('exterior-colors',    [CarModelController::class, 'exteriorColors']); 
 });
  
 
